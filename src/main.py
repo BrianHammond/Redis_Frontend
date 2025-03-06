@@ -6,6 +6,7 @@ from main_ui import Ui_MainWindow as main_ui
 from about_ui import Ui_Form as about_ui
 import redis
 import datetime
+from cryptography.fernet import Fernet
 
 class MainWindow(QMainWindow, main_ui): # used to display the main user interface
     def __init__(self):
@@ -27,6 +28,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.button_delete.clicked.connect(self.redis_delete)
         self.button_query.clicked.connect(self.redis_query)
         self.button_search.clicked.connect(self.redis_search)
+
+        self.label_connection.setText("Not connected to RedisCloud")
 
     def redis_send(self):
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
@@ -310,6 +313,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             self.redis_cloud = RedisCloud(redis_url, redis_port, redis_user, redis_password)
             self.update_connection_status()
             self.initialize_table()
+            self.redis_query()
 
         except redis.ConnectionError as e:
             QMessageBox.critical(self, "Connection Error", f"Failed to connect to Redis: {str(e)}")
@@ -436,6 +440,25 @@ class SettingsManager: # used to load and save settings when opening and closing
     def __init__(self, main_window):
         self.main_window = main_window
         self.settings = QSettings('settings.ini', QSettings.IniFormat)
+        self.key = self.settings.value('encryption_key', None)
+        if self.key is None:
+            self.key = Fernet.generate_key()
+            self.settings.setValue('encryption_key', self.key.decode())
+        self.cipher = Fernet(self.key)
+
+    def encrypt_text(self, text):
+        if not text:
+            return None
+        return self.cipher.encrypt(text.encode()).decode()
+    
+    def decrypt_text(self, encrypted_text):
+        if not encrypted_text:
+            return None
+        try:
+            return self.cipher.decrypt(encrypted_text.encode()).decode()
+        except Exception as e:
+            print(f"Decryption error: {e}")
+            return None
 
     def load_settings(self):
         size = self.settings.value('window_size', None)
@@ -444,6 +467,7 @@ class SettingsManager: # used to load and save settings when opening and closing
         redis_url = self.settings.value('redis_url')
         redis_port = self.settings.value('redis_port')
         redis_user = self.settings.value('redis_user')
+        encrypted_redis_password = self.settings.value('redis_password')
         
         if size is not None:
             self.main_window.resize(size)
@@ -458,6 +482,12 @@ class SettingsManager: # used to load and save settings when opening and closing
             self.main_window.line_redis_port.setText(redis_port)
         if redis_user is not None:
             self.main_window.line_redis_user.setText(redis_user)
+        if encrypted_redis_password is not None:
+            redis_password = self.decrypt_text(encrypted_redis_password)
+            if redis_password:
+                self.main_window.line_redis_password.setText(redis_password)
+            else:
+                self.main_window.line_redis_password.setText("")
 
     def save_settings(self):
         self.settings.setValue('window_size', self.main_window.size())
@@ -466,6 +496,12 @@ class SettingsManager: # used to load and save settings when opening and closing
         self.settings.setValue('redis_url', self.main_window.line_redis_url.text())
         self.settings.setValue('redis_port', self.main_window.line_redis_port.text())
         self.settings.setValue('redis_user', self.main_window.line_redis_user.text())
+
+        redis_password = self.main_window.line_redis_password.text()
+        self.settings.setValue('redis_password', self.encrypt_text(redis_password))
+
+
+
 
 class AboutWindow(QWidget, about_ui): # Configures the About window
     def __init__(self, dark_mode=False):
