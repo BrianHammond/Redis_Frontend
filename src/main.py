@@ -1,9 +1,9 @@
 import sys
 import qdarkstyle
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidget, QTableWidgetItem, QDialog
 from PySide6.QtCore import QSettings
 from main_ui import Ui_MainWindow as main_ui
-from about_ui import Ui_Form as about_ui
+from about_ui import Ui_Dialog as about_ui
 import redis
 import datetime
 from cryptography.fernet import Fernet
@@ -18,8 +18,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         # menubar
         self.action_dark_mode.toggled.connect(self.dark_mode)
-        self.action_about.triggered.connect(self.show_about)
-        self.action_about_qt.triggered.connect(self.about_qt)
+        self.action_about_qt.triggered.connect(lambda: QApplication.aboutQt())
+        self.action_about.triggered.connect(lambda: AboutWindow(dark_mode=self.action_dark_mode.isChecked()).exec())
 
         # buttons
         self.button_connect.clicked.connect(self.redis_connection)
@@ -56,14 +56,14 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         # Prepare the data dictionary
         data = {
             "_id": id,
-            "Name.FirstName": firstname,    # Using dot notation for nested fields
-            "Name.MiddleName": middlename,
-            "Name.LastName": lastname,
+            "First Name": firstname,    # Using dot notation for nested fields
+            "Middle Name": middlename,
+            "Last Name": lastname,
             "Age": age,
             "Title": title,
-            "Address.Address1": address1,
-            "Address.Address2": address2,
-            "Address.Country": country,
+            "Address 1": address1,
+            "Address 2": address2,
+            "Country": country,
             "Misc": misc
         }
 
@@ -109,14 +109,14 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                 # Create updated data dictionary from table
                 data = {
                     "_id": id,
-                    "Name.FirstName": self.table.item(row, 1).text() if self.table.item(row, 1) else "",
-                    "Name.MiddleName": self.table.item(row, 2).text() if self.table.item(row, 2) else "",
-                    "Name.LastName": self.table.item(row, 3).text() if self.table.item(row, 3) else "",
+                    "First Name": self.table.item(row, 1).text() if self.table.item(row, 1) else "",
+                    "Middle Name": self.table.item(row, 2).text() if self.table.item(row, 2) else "",
+                    "Last Name": self.table.item(row, 3).text() if self.table.item(row, 3) else "",
                     "Age": self.table.item(row, 4).text() if self.table.item(row, 4) else "",
                     "Title": self.table.item(row, 5).text() if self.table.item(row, 5) else "",
-                    "Address.Address1": self.table.item(row, 6).text() if self.table.item(row, 6) else "",
-                    "Address.Address2": self.table.item(row, 7).text() if self.table.item(row, 7) else "",
-                    "Address.Country": self.table.item(row, 8).text() if self.table.item(row, 8) else "",
+                    "Address 1": self.table.item(row, 6).text() if self.table.item(row, 6) else "",
+                    "Address 2": self.table.item(row, 7).text() if self.table.item(row, 7) else "",
+                    "Country": self.table.item(row, 8).text() if self.table.item(row, 8) else "",
                     "Misc": self.table.item(row, 9).text() if self.table.item(row, 9) else ""
                 }
 
@@ -206,14 +206,14 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                 
                 # Extract values with defaults if fields are missing
                 id = person_data.get("_id", person_id)
-                firstname = person_data.get("Name.FirstName", "")
-                middlename = person_data.get("Name.MiddleName", "")
-                lastname = person_data.get("Name.LastName", "")
+                firstname = person_data.get("First Name", "")
+                middlename = person_data.get("Middle Name", "")
+                lastname = person_data.get("Last Name", "")
                 age = person_data.get("Age", "")
                 title = person_data.get("Title", "")
-                address1 = person_data.get("Address.Address1", "")
-                address2 = person_data.get("Address.Address2", "")
-                country = person_data.get("Address.Country", "")
+                address1 = person_data.get("Address 1", "")
+                address2 = person_data.get("Address 2", "")
+                country = person_data.get("Country", "")
                 misc = person_data.get("Misc", "")
                 
                 # Add to table
@@ -263,8 +263,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                     person_data = redis_client.hgetall(f"person:{person_id}")
                     
                     # Get name fields for comparison
-                    firstname = person_data.get("Name.FirstName", "").lower()
-                    lastname = person_data.get("Name.LastName", "").lower()
+                    firstname = person_data.get("First Name", "").lower()
+                    lastname = person_data.get("Last Name", "").lower()
                     
                     # Check if record matches search criteria
                     firstname_match = not firstname_search or firstname_search in firstname
@@ -284,16 +284,15 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             QMessageBox.critical(self, "Redis Error", f"Failed to search Redis: {str(e)}")
 
     def _populate_search_result(self, row, person_data):
-        """Helper method to populate table with search results"""
         id = person_data.get("_id", "")
-        firstname = person_data.get("Name.FirstName", "")
-        middlename = person_data.get("Name.MiddleName", "")
-        lastname = person_data.get("Name.LastName", "")
+        firstname = person_data.get("First Name", "")
+        middlename = person_data.get("Middle Name", "")
+        lastname = person_data.get("Last Name", "")
         age = person_data.get("Age", "")
         title = person_data.get("Title", "")
-        address1 = person_data.get("Address.Address1", "")
-        address2 = person_data.get("Address.Address2", "")
-        country = person_data.get("Address.Country", "")
+        address1 = person_data.get("Address 1", "")
+        address2 = person_data.get("Address 2", "")
+        country = person_data.get("Country", "")
         misc = person_data.get("Misc", "")
         
         self.populate_table(row, id, firstname, middlename, lastname, age, title, address1, address2, country, misc)
@@ -362,46 +361,11 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             else:
                 self.label_connection.setText("Failed to connect to RedisCloud")
 
-    def new_file(self):
-        self.filename = QFileDialog.getSaveFileName(self, 'Create a new file', '', 'Data File (*.txt)',)
-
-        if not self.filename[0]:
-            return  # Do nothing if no file is selected
-        
-        self.setWindowTitle(self.filename[0].split('/')[-1])
-        try:
-            with open(self.filename[0], "w", encoding="utf-8") as file:
-                file.write("This is some sample text\nHere is another line")
-        except FileNotFoundError:
-            pass
-
-    def open_file(self):
-        self.filename = QFileDialog.getOpenFileName(self, 'Open file', '', 'Data File (*.txt)',)
-        
-        if not self.filename[0]:
-            return  # Do nothing if no file is selected
-
-        self.setWindowTitle(self.filename[0].split('/')[-1])
-
-        try:
-            with open(self.filename[0], "r", encoding="utf-8") as file:
-                file_content = file.read()
-                self.label.setText(file_content)
-        except FileNotFoundError:
-            pass
-
     def dark_mode(self, checked):
         if checked:
             self.setStyleSheet(qdarkstyle.load_stylesheet_pyside6())
         else:
             self.setStyleSheet('')
-
-    def show_about(self):  # loads the About window
-        self.about_window = AboutWindow(dark_mode=self.action_dark_mode.isChecked())
-        self.about_window.show()
-
-    def about_qt(self):  # loads the About Qt window
-        QApplication.aboutQt()
 
     def closeEvent(self, event):  # Save settings when closing the app
         self.settings_manager.save_settings()  # Save settings using the manager
@@ -500,16 +464,13 @@ class SettingsManager: # used to load and save settings when opening and closing
         redis_password = self.main_window.line_redis_password.text()
         self.settings.setValue('redis_password', self.encrypt_text(redis_password))
 
-
-
-
-class AboutWindow(QWidget, about_ui): # Configures the About window
+class AboutWindow(QDialog, about_ui): # this is the About Window
     def __init__(self, dark_mode=False):
         super().__init__()
         self.setupUi(self)
-
         if dark_mode:
             self.setStyleSheet(qdarkstyle.load_stylesheet_pyside6())
+        self.button_ok.clicked.connect(self.accept)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)  # needs to run first
