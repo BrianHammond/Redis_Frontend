@@ -36,8 +36,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
 
-        self.current_date = datetime.datetime.now().strftime("%m%d%Y%H%M%S")
-        id = self.current_date
+        id = datetime.datetime.now().strftime("%m%d%Y%H%M%S")
 
         # Get the values from the QLineEdits
         firstname = self.line_firstname.text()
