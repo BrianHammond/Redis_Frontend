@@ -31,7 +31,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         self.label_connection.setText("Not connected to RedisCloud")
 
-    def redis_send(self):
+    def redis_send(self): # send to RedisCloud 
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         self.clear_fields()
 
-    def redis_update(self):
+    def redis_update(self): # update information in RedisCloud
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
 
-    def redis_delete(self):
+    def redis_delete(self): # delete information from RedisCloud
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         except AttributeError as e:
             QMessageBox.critical(self, "Table Error", f"Error reading table data: {str(e)}")
 
-    def redis_query(self):
+    def redis_query(self): # query information in RedisCloud
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -224,7 +224,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         except redis.RedisError as e:
             QMessageBox.critical(self, "Redis Error", f"Failed to query Redis: {str(e)}")
 
-    def redis_search(self):
+    def redis_search(self): # search information in RedisCloud
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
