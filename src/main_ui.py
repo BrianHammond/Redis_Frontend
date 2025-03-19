@@ -233,13 +233,30 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_5)
 
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.button_search = QPushButton(self.groupBox_3)
         self.button_search.setObjectName(u"button_search")
         sizePolicy1.setHeightForWidth(self.button_search.sizePolicy().hasHeightForWidth())
         self.button_search.setSizePolicy(sizePolicy1)
         self.button_search.setMinimumSize(QSize(100, 0))
 
-        self.verticalLayout.addWidget(self.button_search)
+        self.horizontalLayout_6.addWidget(self.button_search)
+
+        self.button_csv = QPushButton(self.groupBox_3)
+        self.button_csv.setObjectName(u"button_csv")
+        sizePolicy1.setHeightForWidth(self.button_csv.sizePolicy().hasHeightForWidth())
+        self.button_csv.setSizePolicy(sizePolicy1)
+        self.button_csv.setMinimumSize(QSize(100, 0))
+
+        self.horizontalLayout_6.addWidget(self.button_csv)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_6.addItem(self.horizontalSpacer_3)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_6)
 
 
         self.verticalLayout_2.addWidget(self.groupBox_3)
@@ -288,7 +305,8 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.button_query, self.line_firstname_search)
         QWidget.setTabOrder(self.line_firstname_search, self.line_lastname_search)
         QWidget.setTabOrder(self.line_lastname_search, self.button_search)
-        QWidget.setTabOrder(self.button_search, self.table)
+        QWidget.setTabOrder(self.button_search, self.button_csv)
+        QWidget.setTabOrder(self.button_csv, self.table)
 
         self.menubar.addAction(self.menuSettings.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
@@ -349,6 +367,10 @@ class Ui_MainWindow(object):
         self.button_search.setStatusTip(QCoreApplication.translate("MainWindow", u"Search MongoDB", None))
 #endif // QT_CONFIG(statustip)
         self.button_search.setText(QCoreApplication.translate("MainWindow", u"Search", None))
+#if QT_CONFIG(statustip)
+        self.button_csv.setStatusTip(QCoreApplication.translate("MainWindow", u"Exports to CSV", None))
+#endif // QT_CONFIG(statustip)
+        self.button_csv.setText(QCoreApplication.translate("MainWindow", u"Export to CSV", None))
         self.label_connection.setText(QCoreApplication.translate("MainWindow", u"RedisCloud Connection Status Label", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.menuSettings.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))

@@ -1,6 +1,8 @@
 import sys
 import qdarkstyle
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidget, QTableWidgetItem, QDialog
+import csv
+import re
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidget, QTableWidgetItem, QDialog, QFileDialog
 from PySide6.QtCore import QSettings
 from main_ui import Ui_MainWindow as main_ui
 from about_ui import Ui_Dialog as about_ui
@@ -22,16 +24,17 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.action_about.triggered.connect(lambda: AboutWindow(dark_mode=self.action_dark_mode.isChecked()).exec())
 
         # buttons
-        self.button_connect.clicked.connect(self.redis_connection)
-        self.button_send.clicked.connect(self.redis_send)
-        self.button_update.clicked.connect(self.redis_update)
-        self.button_delete.clicked.connect(self.redis_delete)
-        self.button_query.clicked.connect(self.redis_query)
-        self.button_search.clicked.connect(self.redis_search)
+        self.button_connect.clicked.connect(self.redis_connection) # Connect button is pressed
+        self.button_send.clicked.connect(self.redis_send) # Send button is pressed
+        self.button_update.clicked.connect(self.redis_update) # Update button is pressed
+        self.button_delete.clicked.connect(self.redis_delete) # Delete button is pressed
+        self.button_query.clicked.connect(self.redis_query) # Query button is pressed
+        self.button_search.clicked.connect(self.redis_search) # Search button is pressed
+        self.button_csv.clicked.connect(self.export_to_csv) # CSV button is pressed
 
         self.label_connection.setText("Not connected to RedisCloud")
 
-    def redis_send(self): # send to RedisCloud 
+    def redis_send(self): # send data to RedisCloud (send button is pressed)
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -81,7 +84,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         self.clear_fields()
 
-    def redis_update(self): # update information in RedisCloud
+    def redis_update(self): # update information in RedisCloud (update button is pressed)
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -133,7 +136,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
 
-    def redis_delete(self): # delete information from RedisCloud
+    def redis_delete(self): # delete information from RedisCloud (delete button is pressed)
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -179,7 +182,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         except AttributeError as e:
             QMessageBox.critical(self, "Table Error", f"Error reading table data: {str(e)}")
 
-    def redis_query(self): # query information in RedisCloud
+    def redis_query(self): # query information in RedisCloud (query button is pressed)
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
@@ -224,14 +227,14 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         except redis.RedisError as e:
             QMessageBox.critical(self, "Redis Error", f"Failed to query Redis: {str(e)}")
 
-    def redis_search(self): # search information in RedisCloud
+    def redis_search(self):  # Search information in RedisCloud
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
 
-        # Get search criteria
-        firstname_search = self.line_firstname_search.text().strip().lower()
-        lastname_search = self.line_lastname_search.text().strip().lower()
+        # Get search criteria (no need to lowercase here, we'll handle it in comparison)
+        firstname_search = self.line_firstname_search.text().strip()
+        lastname_search = self.line_lastname_search.text().strip()
 
         try:
             redis_client = self.redis_cloud.get_client()
@@ -262,27 +265,28 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                     person_data = redis_client.hgetall(f"person:{person_id}")
                     
                     # Get name fields for comparison
-                    firstname = person_data.get("First Name", "").lower()
-                    lastname = person_data.get("Last Name", "").lower()
+                    firstname = person_data.get("First Name", "")
+                    lastname = person_data.get("Last Name", "")
                     
-                    # Check if record matches search criteria
-                    firstname_match = not firstname_search or firstname_search in firstname
-                    lastname_match = not lastname_search or lastname_search in lastname
+                    # Case-insensitive comparison using lower() or re.IGNORECASE
+                    import re
+                    firstname_match = not firstname_search or re.search(re.escape(firstname_search), firstname, re.IGNORECASE)
+                    lastname_match = not lastname_search or re.search(re.escape(lastname_search), lastname, re.IGNORECASE)
                     
                     if firstname_match and lastname_match:
                         self._populate_search_result(row, person_data)
                         row += 1
                         matches += 1
 
-            if matches == 0:
-                QMessageBox.information(self, "Search Result", "No matching records found")
-            else:
-                QMessageBox.information(self, "Search Result", f"Found {matches} matching record(s)")
+                if matches == 0:
+                    QMessageBox.information(self, "Search Result", "No matching records found")
+                else:
+                    QMessageBox.information(self, "Search Result", f"Found {matches} matching record(s)")
 
         except redis.RedisError as e:
             QMessageBox.critical(self, "Redis Error", f"Failed to search Redis: {str(e)}")
 
-    def _populate_search_result(self, row, person_data):
+    def _populate_search_result(self, row, person_data): # populates the table after searching
         id = person_data.get("_id", "")
         firstname = person_data.get("First Name", "")
         middlename = person_data.get("Middle Name", "")
@@ -295,6 +299,34 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         misc = person_data.get("Misc", "")
         
         self.populate_table(row, id, firstname, middlename, lastname, age, title, address1, address2, country, misc)
+
+    def export_to_csv(self):  # exports data to CSV (export to CSV button is pressed)
+        self.filename = QFileDialog.getSaveFileName(self, 'Export File', '', 'Data File (*.csv)')
+
+        if not self.filename[0]:
+            return
+
+        try:
+            with open(self.filename[0], 'w', newline='') as file:
+                writer = csv.writer(file)
+                
+                # Write the header row (column names from the table)
+                headers = [self.table.horizontalHeaderItem(col).text() for col in range(self.table.columnCount())]
+                writer.writerow(headers)
+
+                # Write the data rows from the table
+                for row in range(self.table.rowCount()):
+                    row_data = []
+                    for col in range(self.table.columnCount()):
+                        item = self.table.item(row, col)
+                        # Append the text if the item exists, otherwise append an empty string
+                        row_data.append(item.text() if item else '')
+                    writer.writerow(row_data)
+
+            QMessageBox.information(self, "Export Successful", f"Table data exported to {self.filename[0]}")
+        
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Failed to export to CSV: {str(e)}")
 
     def redis_connection(self):
         redis_url = self.line_redis_url.text()
@@ -369,6 +401,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
     def closeEvent(self, event):  # Save settings when closing the app
         self.settings_manager.save_settings()  # Save settings using the manager
         event.accept()
+
+
 
 class RedisCloud:
     def __init__(self, redis_url, redis_port, redis_user, redis_password):
