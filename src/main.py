@@ -30,7 +30,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.button_delete.clicked.connect(self.redis_delete) # Delete button is pressed
         self.button_query.clicked.connect(self.redis_query) # Query button is pressed
         self.button_search.clicked.connect(self.redis_search) # Search button is pressed
-        self.button_csv.clicked.connect(self.export_to_csv) # CSV button is pressed
+        self.button_import_csv.clicked.connect(self.import_csv) # Import CSV button is pressed
+        self.button_export_csv.clicked.connect(self.export_to_csv) # Export to CSV button is pressed
 
         self.label_connection.setText("Not connected to RedisCloud")
 
@@ -328,6 +329,78 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         except Exception as e:
             QMessageBox.critical(self, "Export Error", f"Failed to export to CSV: {str(e)}")
 
+    def import_csv(self):  # imports data from CSV (import CSV button is pressed)
+        # Open file dialog to select CSV file
+        filename, _ = QFileDialog.getOpenFileName(self, 'Import CSV File', '', 'CSV Files (*.csv)')
+        
+        if not filename:  # User cancelled the dialog
+            return
+
+        if self.redis_cloud is None or not self.redis_cloud.check_connection():
+            QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
+            return
+
+        try:
+            redis_client = self.redis_cloud.get_client()
+            imported_count = 0
+            
+            with open(filename, 'r', newline='') as file:
+                reader = csv.DictReader(file)
+                
+                # Verify required headers exist
+                expected_headers = {'ID', 'First Name', 'Middle Name', 'Last Name', 'Age', 
+                                'Title', 'Address 1', 'Address 2', 'Country', 'Misc'}
+                if not all(header in reader.fieldnames for header in expected_headers):
+                    QMessageBox.warning(self, "CSV Format Error", 
+                                    "CSV file must contain all required headers: ID, First Name, "
+                                    "Middle Name, Last Name, Age, Title, Address 1, Address 2, "
+                                    "Country, Misc")
+                    return
+
+                # Clear existing table content
+                self.table.setRowCount(0)
+                
+                # Process each row
+                for row_num, row in enumerate(reader):
+                    # Use existing ID if provided, otherwise generate new one
+                    id = row['ID'] if row['ID'] else datetime.datetime.now().strftime("%m%d%Y%H%M%S")
+                    
+                    # Prepare data dictionary
+                    data = {
+                        "_id": id,
+                        "First Name": row['First Name'] or "",
+                        "Middle Name": row['Middle Name'] or "",
+                        "Last Name": row['Last Name'] or "",
+                        "Age": row['Age'] or "",
+                        "Title": row['Title'] or "",
+                        "Address 1": row['Address 1'] or "",
+                        "Address 2": row['Address 2'] or "",
+                        "Country": row['Country'] or "",
+                        "Misc": row['Misc'] or ""
+                    }
+                    
+                    # Store in Redis
+                    redis_client.hset(f"person:{id}", mapping=data)
+                    redis_client.sadd("person_ids", id)
+                    
+                    # Add to table
+                    self.populate_table(row_num, id, data["First Name"], data["Middle Name"],
+                                    data["Last Name"], data["Age"], data["Title"],
+                                    data["Address 1"], data["Address 2"], data["Country"],
+                                    data["Misc"])
+                    
+                    imported_count += 1
+
+            QMessageBox.information(self, "Import Successful", 
+                                f"Successfully imported {imported_count} record(s) from CSV")
+            
+        except FileNotFoundError:
+            QMessageBox.critical(self, "File Error", "Could not find the specified CSV file")
+        except redis.RedisError as e:
+            QMessageBox.critical(self, "Redis Error", f"Failed to import to Redis: {str(e)}")
+        except Exception as e:
+            QMessageBox.critical(self, "Import Error", f"Failed to import CSV: {str(e)}")
+
     def redis_connection(self):
         redis_url = self.line_redis_url.text()
         redis_port = self.line_redis_port.text()
@@ -401,8 +474,6 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
     def closeEvent(self, event):  # Save settings when closing the app
         self.settings_manager.save_settings()  # Save settings using the manager
         event.accept()
-
-
 
 class RedisCloud:
     def __init__(self, redis_url, redis_port, redis_user, redis_password):
