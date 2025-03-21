@@ -1,14 +1,13 @@
 import sys
 import qdarkstyle
 import csv
-import re
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidget, QTableWidgetItem, QDialog, QFileDialog
 from PySide6.QtCore import QSettings
 from main_ui import Ui_MainWindow as main_ui
 from about_ui import Ui_Dialog as about_ui
 import redis
-import datetime
 from cryptography.fernet import Fernet
+import uuid
 
 class MainWindow(QMainWindow, main_ui): # used to display the main user interface
     def __init__(self):
@@ -40,7 +39,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
             return
 
-        id = datetime.datetime.now().strftime("%m%d%Y%H%M%S")
+        id = str(uuid.uuid4()) # Generate a unique ID for the person
 
         # Get the values from the QLineEdits
         firstname = self.line_firstname.text()
@@ -329,11 +328,10 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         except Exception as e:
             QMessageBox.critical(self, "Export Error", f"Failed to export to CSV: {str(e)}")
 
-    def import_csv(self):  # imports data from CSV (import CSV button is pressed)
-        # Open file dialog to select CSV file
+    def import_csv(self):
         filename, _ = QFileDialog.getOpenFileName(self, 'Import CSV File', '', 'CSV Files (*.csv)')
         
-        if not filename:  # User cancelled the dialog
+        if not filename:
             return
 
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
@@ -347,25 +345,20 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             with open(filename, 'r', newline='') as file:
                 reader = csv.DictReader(file)
                 
-                # Verify required headers exist
                 expected_headers = {'ID', 'First Name', 'Middle Name', 'Last Name', 'Age', 
-                                'Title', 'Address 1', 'Address 2', 'Country', 'Misc'}
+                                    'Title', 'Address 1', 'Address 2', 'Country', 'Misc'}
                 if not all(header in reader.fieldnames for header in expected_headers):
                     QMessageBox.warning(self, "CSV Format Error", 
-                                    "CSV file must contain all required headers: ID, First Name, "
-                                    "Middle Name, Last Name, Age, Title, Address 1, Address 2, "
-                                    "Country, Misc")
+                                        "CSV file must contain all required headers: ID, First Name, "
+                                        "Middle Name, Last Name, Age, Title, Address 1, Address 2, "
+                                        "Country, Misc")
                     return
 
-                # Clear existing table content
                 self.table.setRowCount(0)
                 
-                # Process each row
                 for row_num, row in enumerate(reader):
-                    # Use existing ID if provided, otherwise generate new one
-                    id = row['ID'] if row['ID'] else datetime.datetime.now().strftime("%m%d%Y%H%M%S")
+                    id = row['ID'] if row['ID'] else str(uuid.uuid4())  # Generate a new ID if not provided
                     
-                    # Prepare data dictionary
                     data = {
                         "_id": id,
                         "First Name": row['First Name'] or "",
@@ -379,11 +372,9 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                         "Misc": row['Misc'] or ""
                     }
                     
-                    # Store in Redis
                     redis_client.hset(f"person:{id}", mapping=data)
                     redis_client.sadd("person_ids", id)
                     
-                    # Add to table
                     self.populate_table(row_num, id, data["First Name"], data["Middle Name"],
                                     data["Last Name"], data["Age"], data["Title"],
                                     data["Address 1"], data["Address 2"], data["Country"],
@@ -392,7 +383,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                     imported_count += 1
 
             QMessageBox.information(self, "Import Successful", 
-                                f"Successfully imported {imported_count} record(s) from CSV")
+                                    f"Successfully imported {imported_count} record(s) from CSV")
             
         except FileNotFoundError:
             QMessageBox.critical(self, "File Error", "Could not find the specified CSV file")
