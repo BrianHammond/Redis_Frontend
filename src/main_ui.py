@@ -75,7 +75,7 @@ class Ui_MainWindow(object):
         self.line_redis_user.setObjectName(u"line_redis_user")
         sizePolicy1.setHeightForWidth(self.line_redis_user.sizePolicy().hasHeightForWidth())
         self.line_redis_user.setSizePolicy(sizePolicy1)
-        self.line_redis_user.setMinimumSize(QSize(150, 0))
+        self.line_redis_user.setMinimumSize(QSize(160, 0))
         self.line_redis_user.setEchoMode(QLineEdit.EchoMode.Normal)
 
         self.horizontalLayout_4.addWidget(self.line_redis_user)
@@ -337,7 +337,7 @@ class Ui_MainWindow(object):
         self.line_redis_url.setText("")
         self.line_redis_url.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Redis URL", None))
         self.line_redis_port.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Port", None))
-        self.line_redis_user.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Username", None))
+        self.line_redis_user.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Username (default if blank)", None))
         self.line_redis_password.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Password", None))
         self.button_connect.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Employee Information", None))

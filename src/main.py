@@ -42,15 +42,15 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         id = str(uuid.uuid4()) # Generate a unique ID for the person
 
         # Get the values from the QLineEdits
-        firstname = self.line_firstname.text()
-        middlename = self.line_middlename.text()
-        lastname = self.line_lastname.text()
-        age = self.line_age.text()
-        title = self.line_title.text()
-        address1 = self.line_address1.text()
-        address2 = self.line_address2.text()
-        country = self.line_country.text()
-        misc = self.line_misc.text()
+        firstname = self.line_firstname.text().strip()
+        middlename = self.line_middlename.text().strip()
+        lastname = self.line_lastname.text().strip()
+        age = self.line_age.text().strip()
+        title = self.line_title.text().strip()
+        address1 = self.line_address1.text().strip()
+        address2 = self.line_address2.text().strip()
+        country = self.line_country.text().strip()
+        misc = self.line_misc.text().strip()
 
         row = self.table.rowCount()
         self.populate_table(row, id, firstname, middlename, lastname, age, title, address1, address2, country, misc)
@@ -393,10 +393,13 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             QMessageBox.critical(self, "Import Error", f"Failed to import CSV: {str(e)}")
 
     def redis_connection(self):
-        redis_url = self.line_redis_url.text()
-        redis_port = self.line_redis_port.text()
-        redis_user = self.line_redis_user.text()
-        redis_password = self.line_redis_password.text()
+        redis_url = self.line_redis_url.text().strip()
+        redis_port = self.line_redis_port.text().strip()
+        redis_user = self.line_redis_user.text().strip()
+        if redis_user == '':
+            redis_user = 'default'  # Default username if not provided
+        redis_password = self.line_redis_password.text().strip()
+
 
         if any(not field for field in [redis_url, redis_port, redis_user, redis_password]):
             QMessageBox.warning(self, "Input Error", "Please fill in all fields")
