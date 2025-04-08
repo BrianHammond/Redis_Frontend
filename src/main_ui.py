@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.2
+## Created by: Qt User Interface Compiler version 6.9.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -16,18 +16,18 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QGridLayout, QGroupBox, QHBoxLayout,
-    QHeaderView, QLabel, QLineEdit, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QSizePolicy,
-    QSpacerItem, QStatusBar, QTableWidget, QTableWidgetItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QDateEdit, QGroupBox,
+    QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QSizePolicy, QSpacerItem, QStatusBar, QTableWidget,
+    QTableWidgetItem, QVBoxLayout, QWidget)
 import resources_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1062, 780)
+        MainWindow.resize(832, 721)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -46,12 +46,14 @@ class Ui_MainWindow(object):
         self.action_dark_mode.setCheckable(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_5 = QVBoxLayout(self.centralwidget)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.groupBox_2 = QGroupBox(self.centralwidget)
         self.groupBox_2.setObjectName(u"groupBox_2")
-        self.horizontalLayout_4 = QHBoxLayout(self.groupBox_2)
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.verticalLayout_4 = QVBoxLayout(self.groupBox_2)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.line_redis_url = QLineEdit(self.groupBox_2)
         self.line_redis_url.setObjectName(u"line_redis_url")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
@@ -61,7 +63,7 @@ class Ui_MainWindow(object):
         self.line_redis_url.setSizePolicy(sizePolicy1)
         self.line_redis_url.setMinimumSize(QSize(400, 0))
 
-        self.horizontalLayout_4.addWidget(self.line_redis_url)
+        self.horizontalLayout_7.addWidget(self.line_redis_url)
 
         self.line_redis_port = QLineEdit(self.groupBox_2)
         self.line_redis_port.setObjectName(u"line_redis_port")
@@ -69,8 +71,17 @@ class Ui_MainWindow(object):
         self.line_redis_port.setSizePolicy(sizePolicy1)
         self.line_redis_port.setMinimumSize(QSize(50, 0))
 
-        self.horizontalLayout_4.addWidget(self.line_redis_port)
+        self.horizontalLayout_7.addWidget(self.line_redis_port)
 
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_7.addItem(self.horizontalSpacer_2)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout_7)
+
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
         self.line_redis_user = QLineEdit(self.groupBox_2)
         self.line_redis_user.setObjectName(u"line_redis_user")
         sizePolicy1.setHeightForWidth(self.line_redis_user.sizePolicy().hasHeightForWidth())
@@ -78,7 +89,7 @@ class Ui_MainWindow(object):
         self.line_redis_user.setMinimumSize(QSize(160, 0))
         self.line_redis_user.setEchoMode(QLineEdit.EchoMode.Normal)
 
-        self.horizontalLayout_4.addWidget(self.line_redis_user)
+        self.horizontalLayout_8.addWidget(self.line_redis_user)
 
         self.line_redis_password = QLineEdit(self.groupBox_2)
         self.line_redis_password.setObjectName(u"line_redis_password")
@@ -87,7 +98,7 @@ class Ui_MainWindow(object):
         self.line_redis_password.setMinimumSize(QSize(150, 0))
         self.line_redis_password.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.horizontalLayout_4.addWidget(self.line_redis_password)
+        self.horizontalLayout_8.addWidget(self.line_redis_password)
 
         self.button_connect = QPushButton(self.groupBox_2)
         self.button_connect.setObjectName(u"button_connect")
@@ -95,23 +106,24 @@ class Ui_MainWindow(object):
         self.button_connect.setSizePolicy(sizePolicy1)
         self.button_connect.setMinimumSize(QSize(100, 0))
 
-        self.horizontalLayout_4.addWidget(self.button_connect)
+        self.horizontalLayout_8.addWidget(self.button_connect)
 
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_2)
+        self.horizontalLayout_8.addItem(self.horizontalSpacer_6)
 
 
-        self.verticalLayout_2.addWidget(self.groupBox_2)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_8)
+
+
+        self.verticalLayout_5.addWidget(self.groupBox_2)
 
         self.groupBox = QGroupBox(self.centralwidget)
         self.groupBox.setObjectName(u"groupBox")
-        self.gridLayout = QGridLayout(self.groupBox)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setContentsMargins(9, 9, 9, 9)
+        self.verticalLayout_2 = QVBoxLayout(self.groupBox)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.line_firstname = QLineEdit(self.groupBox)
         self.line_firstname.setObjectName(u"line_firstname")
 
@@ -132,22 +144,11 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.line_age)
 
-        self.line_title = QLineEdit(self.groupBox)
-        self.line_title.setObjectName(u"line_title")
 
-        self.horizontalLayout.addWidget(self.line_title)
-
-
-        self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
-
-        self.line_misc = QLineEdit(self.groupBox)
-        self.line_misc.setObjectName(u"line_misc")
-
-        self.gridLayout.addWidget(self.line_misc, 2, 0, 1, 1)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.line_address1 = QLineEdit(self.groupBox)
         self.line_address1.setObjectName(u"line_address1")
 
@@ -164,10 +165,73 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.line_country)
 
 
-        self.gridLayout.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+
+        self.line_misc = QLineEdit(self.groupBox)
+        self.line_misc.setObjectName(u"line_misc")
+
+        self.verticalLayout_2.addWidget(self.line_misc)
 
 
-        self.verticalLayout_2.addWidget(self.groupBox)
+        self.verticalLayout_5.addWidget(self.groupBox)
+
+        self.groupBox_4 = QGroupBox(self.centralwidget)
+        self.groupBox_4.setObjectName(u"groupBox_4")
+        self.verticalLayout_3 = QVBoxLayout(self.groupBox_4)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.label = QLabel(self.groupBox_4)
+        self.label.setObjectName(u"label")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout_4.addWidget(self.label)
+
+        self.join_date = QDateEdit(self.groupBox_4)
+        self.join_date.setObjectName(u"join_date")
+        sizePolicy1.setHeightForWidth(self.join_date.sizePolicy().hasHeightForWidth())
+        self.join_date.setSizePolicy(sizePolicy1)
+        self.join_date.setMinimumSize(QSize(120, 0))
+
+        self.horizontalLayout_4.addWidget(self.join_date)
+
+        self.horizontalSpacer_4 = QSpacerItem(30, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_4)
+
+        self.label_2 = QLabel(self.groupBox_4)
+        self.label_2.setObjectName(u"label_2")
+        sizePolicy2.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
+        self.label_2.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout_4.addWidget(self.label_2)
+
+        self.combobox_department = QComboBox(self.groupBox_4)
+        self.combobox_department.setObjectName(u"combobox_department")
+        sizePolicy1.setHeightForWidth(self.combobox_department.sizePolicy().hasHeightForWidth())
+        self.combobox_department.setSizePolicy(sizePolicy1)
+        self.combobox_department.setMinimumSize(QSize(150, 0))
+
+        self.horizontalLayout_4.addWidget(self.combobox_department)
+
+        self.horizontalSpacer_5 = QSpacerItem(30, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_5)
+
+        self.line_title = QLineEdit(self.groupBox_4)
+        self.line_title.setObjectName(u"line_title")
+
+        self.horizontalLayout_4.addWidget(self.line_title)
+
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_4)
+
+
+        self.verticalLayout_5.addWidget(self.groupBox_4)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -209,7 +273,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addItem(self.horizontalSpacer)
 
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_3)
 
         self.groupBox_3 = QGroupBox(self.centralwidget)
         self.groupBox_3.setObjectName(u"groupBox_3")
@@ -267,24 +331,24 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout_6)
 
 
-        self.verticalLayout_2.addWidget(self.groupBox_3)
+        self.verticalLayout_5.addWidget(self.groupBox_3)
 
         self.table = QTableWidget(self.centralwidget)
         self.table.setObjectName(u"table")
         self.table.setRowCount(0)
         self.table.verticalHeader().setVisible(False)
 
-        self.verticalLayout_2.addWidget(self.table)
+        self.verticalLayout_5.addWidget(self.table)
 
         self.label_connection = QLabel(self.centralwidget)
         self.label_connection.setObjectName(u"label_connection")
 
-        self.verticalLayout_2.addWidget(self.label_connection)
+        self.verticalLayout_5.addWidget(self.label_connection)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1062, 22))
+        self.menubar.setGeometry(QRect(0, 0, 832, 22))
         self.menuHelp = QMenu(self.menubar)
         self.menuHelp.setObjectName(u"menuHelp")
         self.menuSettings = QMenu(self.menubar)
@@ -301,12 +365,14 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.line_firstname, self.line_middlename)
         QWidget.setTabOrder(self.line_middlename, self.line_lastname)
         QWidget.setTabOrder(self.line_lastname, self.line_age)
-        QWidget.setTabOrder(self.line_age, self.line_title)
-        QWidget.setTabOrder(self.line_title, self.line_address1)
+        QWidget.setTabOrder(self.line_age, self.line_address1)
         QWidget.setTabOrder(self.line_address1, self.line_address2)
         QWidget.setTabOrder(self.line_address2, self.line_country)
         QWidget.setTabOrder(self.line_country, self.line_misc)
-        QWidget.setTabOrder(self.line_misc, self.button_send)
+        QWidget.setTabOrder(self.line_misc, self.join_date)
+        QWidget.setTabOrder(self.join_date, self.combobox_department)
+        QWidget.setTabOrder(self.combobox_department, self.line_title)
+        QWidget.setTabOrder(self.line_title, self.button_send)
         QWidget.setTabOrder(self.button_send, self.button_update)
         QWidget.setTabOrder(self.button_update, self.button_delete)
         QWidget.setTabOrder(self.button_delete, self.button_query)
@@ -345,14 +411,17 @@ class Ui_MainWindow(object):
         self.line_middlename.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Middle Name", None))
         self.line_lastname.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Last Name", None))
         self.line_age.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Age", None))
-        self.line_title.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Title", None))
-        self.line_misc.setText("")
-        self.line_misc.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Misc Info", None))
         self.line_address1.setText("")
         self.line_address1.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Address 1", None))
         self.line_address2.setText("")
         self.line_address2.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Address 2", None))
         self.line_country.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Country", None))
+        self.line_misc.setText("")
+        self.line_misc.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Misc Info", None))
+        self.groupBox_4.setTitle(QCoreApplication.translate("MainWindow", u"Department", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Join Date", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Department", None))
+        self.line_title.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Title", None))
 #if QT_CONFIG(statustip)
         self.button_send.setStatusTip(QCoreApplication.translate("MainWindow", u"Send to RedisCloud", None))
 #endif // QT_CONFIG(statustip)

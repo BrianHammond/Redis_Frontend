@@ -2,7 +2,7 @@ import sys
 import qdarkstyle
 import csv
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidget, QTableWidgetItem, QDialog, QFileDialog
-from PySide6.QtCore import QSettings
+from PySide6.QtCore import QSettings, QDate
 from main_ui import Ui_MainWindow as main_ui
 from about_ui import Ui_Dialog as about_ui
 import redis
@@ -16,6 +16,19 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.settings_manager = SettingsManager(self)  # Initializes SettingsManager
         self.settings_manager.load_settings()  # Load settings when the app starts
         self.redis_cloud = None
+
+        # Populate the department combo box
+        departments = [
+            "Executive",
+            "Human Resources",
+            "Engineering",
+            "Sales",
+            "Marketing",
+            "Finance",
+            "IT",
+            "Operations"
+        ]
+        self.combobox_department.addItems(departments)
 
         # menubar
         self.action_dark_mode.toggled.connect(self.dark_mode)
@@ -34,6 +47,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         self.label_connection.setText("Not connected to RedisCloud")
 
+        self.clear_fields()  # Clear input fields on startup
+
     def redis_send(self): # send data to RedisCloud (send button is pressed)
         if self.redis_cloud is None or not self.redis_cloud.check_connection():
             QMessageBox.warning(self, "Connection Error", "Please connect to Redis first")
@@ -47,13 +62,15 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         lastname = self.line_lastname.text().strip()
         age = self.line_age.text().strip()
         title = self.line_title.text().strip()
+        joindate = self.join_date.date().toString("MM-dd-yyyy")
+        department = self.combobox_department.currentText()
         address1 = self.line_address1.text().strip()
         address2 = self.line_address2.text().strip()
         country = self.line_country.text().strip()
         misc = self.line_misc.text().strip()
 
         row = self.table.rowCount()
-        self.populate_table(row, id, firstname, middlename, lastname, age, title, address1, address2, country, misc)
+        self.populate_table(row, id, firstname, middlename, lastname, age, title, joindate, department, address1, address2, country, misc)
 
         # Prepare the data dictionary
         data = {
@@ -63,6 +80,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             "Last Name": lastname,
             "Age": age,
             "Title": title,
+            "Join Date": joindate,
+            "Department": department,
             "Address 1": address1,
             "Address 2": address2,
             "Country": country,
@@ -116,10 +135,12 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                     "Last Name": self.table.item(row, 3).text() if self.table.item(row, 3) else "",
                     "Age": self.table.item(row, 4).text() if self.table.item(row, 4) else "",
                     "Title": self.table.item(row, 5).text() if self.table.item(row, 5) else "",
-                    "Address 1": self.table.item(row, 6).text() if self.table.item(row, 6) else "",
-                    "Address 2": self.table.item(row, 7).text() if self.table.item(row, 7) else "",
-                    "Country": self.table.item(row, 8).text() if self.table.item(row, 8) else "",
-                    "Misc": self.table.item(row, 9).text() if self.table.item(row, 9) else ""
+                    "Join Date": self.table.item(row, 6).text() if self.table.item(row, 6) else "",
+                    "Department": self.table.item(row, 7).text() if self.table.item(row, 7) else "",
+                    "Address 1": self.table.item(row, 8).text() if self.table.item(row, 6) else "",
+                    "Address 2": self.table.item(row, 9).text() if self.table.item(row, 7) else "",
+                    "Country": self.table.item(row, 10).text() if self.table.item(row, 8) else "",
+                    "Misc": self.table.item(row, 11).text() if self.table.item(row, 9) else ""
                 }
 
                 # Update the Redis hash
@@ -213,13 +234,15 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                 lastname = person_data.get("Last Name", "")
                 age = person_data.get("Age", "")
                 title = person_data.get("Title", "")
+                joindate = person_data.get("Join Date", "")
+                department = person_data.get("Department", "")
                 address1 = person_data.get("Address 1", "")
                 address2 = person_data.get("Address 2", "")
                 country = person_data.get("Country", "")
                 misc = person_data.get("Misc", "")
                 
                 # Add to table
-                self.populate_table(row, id, firstname, middlename, lastname, age, title, address1, address2, country, misc)
+                self.populate_table(row, id, firstname, middlename, lastname, age, title, joindate, department, address1, address2, country, misc)
                 row += 1
 
             QMessageBox.information(self, "Success", f"Retrieved {row} record(s) from Redis")
@@ -293,12 +316,14 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         lastname = person_data.get("Last Name", "")
         age = person_data.get("Age", "")
         title = person_data.get("Title", "")
+        joindate = person_data.get("Join Date", "")
+        department = person_data.get("Department", "")
         address1 = person_data.get("Address 1", "")
         address2 = person_data.get("Address 2", "")
         country = person_data.get("Country", "")
         misc = person_data.get("Misc", "")
         
-        self.populate_table(row, id, firstname, middlename, lastname, age, title, address1, address2, country, misc)
+        self.populate_table(row, id, firstname, middlename, lastname, age, title, joindate, department, address1, address2, country, misc)
 
     def export_to_csv(self):  # exports data to CSV (export to CSV button is pressed)
         self.filename = QFileDialog.getSaveFileName(self, 'Export File', '', 'Data File (*.csv)')
@@ -345,13 +370,11 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
             with open(filename, 'r', newline='') as file:
                 reader = csv.DictReader(file)
                 
-                expected_headers = {'ID', 'First Name', 'Middle Name', 'Last Name', 'Age', 
-                                    'Title', 'Address 1', 'Address 2', 'Country', 'Misc'}
+                expected_headers = {'ID', 'First Name', 'Middle Name', 'Last Name', 'Age', 'Title', 'Join Date', 'Department', 'Address 1', 'Address 2', 'Country', 'Misc'}
                 if not all(header in reader.fieldnames for header in expected_headers):
                     QMessageBox.warning(self, "CSV Format Error", 
-                                        "CSV file must contain all required headers: ID, First Name, "
-                                        "Middle Name, Last Name, Age, Title, Address 1, Address 2, "
-                                        "Country, Misc")
+                                        "CSV file must contain all required headers:"
+                                         "ID, First Name, Middle Name, Last Name, Age, Title, Join Date, Department, Address 1, Address 2, Country, Misc")
                     return
 
                 self.table.setRowCount(0)
@@ -366,6 +389,8 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                         "Last Name": row['Last Name'] or "",
                         "Age": row['Age'] or "",
                         "Title": row['Title'] or "",
+                        "Join Date": row['Join Date'] or "",
+                        "Department": row['Department'] or "",
                         "Address 1": row['Address 1'] or "",
                         "Address 2": row['Address 2'] or "",
                         "Country": row['Country'] or "",
@@ -375,10 +400,19 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
                     redis_client.hset(f"person:{id}", mapping=data)
                     redis_client.sadd("person_ids", id)
                     
-                    self.populate_table(row_num, id, data["First Name"], data["Middle Name"],
-                                    data["Last Name"], data["Age"], data["Title"],
-                                    data["Address 1"], data["Address 2"], data["Country"],
-                                    data["Misc"])
+                    self.populate_table(row_num, 
+                                        id, 
+                                        data["First Name"], 
+                                        data["Middle Name"],
+                                        data["Last Name"], 
+                                        data["Age"], 
+                                        data["Title"], 
+                                        data["Join Date"], 
+                                        data["Department"],
+                                        data["Address 1"], 
+                                        data["Address 2"], 
+                                        data["Country"],
+                                        data["Misc"])
                     
                     imported_count += 1
 
@@ -419,11 +453,11 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
     def initialize_table(self):
         self.table.setRowCount(0) # clears the table
-        self.table.setColumnCount(10)
-        self.table.setHorizontalHeaderLabels(['ID', 'First Name', 'Middle Name', 'Last Name', 'Age', 'Title', 'Address 1', 'Address 2', 'Country', 'Misc'])
+        self.table.setColumnCount(12)
+        self.table.setHorizontalHeaderLabels(['ID', 'First Name', 'Middle Name', 'Last Name', 'Age', 'Title', 'Join Date', 'Department', 'Address 1', 'Address 2', 'Country', 'Misc'])
         self.table.setSelectionMode(QTableWidget.MultiSelection)
 
-    def populate_table(self, row, id, firstname, middlename, lastname, age, title, address1, address2, country, misc):
+    def populate_table(self, row, id, firstname, middlename, lastname, age, title, joindate, department, address1, address2, country, misc):
         self.table.insertRow(row)
         self.table.setItem(row, 0, QTableWidgetItem(str(id)))
         self.table.setItem(row, 1, QTableWidgetItem(firstname))
@@ -431,14 +465,18 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.table.setItem(row, 3, QTableWidgetItem(lastname))
         self.table.setItem(row, 4, QTableWidgetItem(age))
         self.table.setItem(row, 5, QTableWidgetItem(title))
-        self.table.setItem(row, 6, QTableWidgetItem(address1))
-        self.table.setItem(row, 7, QTableWidgetItem(address2))
-        self.table.setItem(row, 8, QTableWidgetItem(country))
-        self.table.setItem(row, 9, QTableWidgetItem(misc))
+        self.table.setItem(row, 6, QTableWidgetItem(joindate))
+        self.table.setItem(row, 7, QTableWidgetItem(department))
+        self.table.setItem(row, 8, QTableWidgetItem(address1))
+        self.table.setItem(row, 9, QTableWidgetItem(address2))
+        self.table.setItem(row, 10, QTableWidgetItem(country))
+        self.table.setItem(row, 11, QTableWidgetItem(misc))
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
 
     def clear_fields(self):
+        self.join_date.setDate(QDate.currentDate())
+        self.combobox_department.setCurrentIndex(0)
         self.line_firstname.clear()
         self.line_middlename.clear()
         self.line_lastname.clear()
